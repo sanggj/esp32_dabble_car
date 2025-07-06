@@ -1,3 +1,3 @@
-if you want to use this code you need 1 car(2 or 4 wheel) and a esp32 
+an arduino ide code to use dabble app and an esp32 to control the car.This code has been tested with esp32 wroom 32, esp32 w 1E, esp32 c6
 
-in this code I will use the arrow/joystick to move like normal but if you want to go straight(all motor go straight when using the joystick mode) you can use the triangle for go straight, square turn left, circle turn right, and cross for go backward
+if you keep getting any error dm me and say what error you're getting and I will fix it for you
