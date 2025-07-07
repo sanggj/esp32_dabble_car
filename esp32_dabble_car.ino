@@ -1,4 +1,3 @@
-// Optimized ESP32 robot control code with immediate response and no smoothing
 #define CUSTOM_SETTINGS
 #define INCLUDE_GAMEPAD_MODULE
 #include <DabbleESP32.h>
@@ -100,7 +99,7 @@ constexpr uint8_t HIGH_SPEED_BOOST_TABLE[] = {
     Constants::MIN_PWM + 80,  // 3: 130
     Constants::MIN_PWM + 120, // 4: 170
     Constants::MIN_PWM + 170, // 5: 220
-    Constants::MIN_PWM + 205, // 6: 255 (fixed to fit uint8_t)
+    Constants::MIN_PWM + 205, // 6: 255
     Constants::MAX_PWM      // 7: 255
 };
 
