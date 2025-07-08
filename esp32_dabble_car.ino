@@ -39,7 +39,6 @@ namespace Constants {
     const uint8_t CALIBRATION_SAMPLES = 12; // Samples for joystick calibration
     const uint8_t MAX_ERROR_COUNT = 5; // Max errors before fault
     const uint8_t INPUT_SMOOTHING_SAMPLES = 1; // Set to 1 to disable smoothing
-    const float MAX_TEMP_C = 70.0;     // Max motor temperature (C)
     const unsigned long LED_BLINK_INTERVAL = 500; // LED blink interval (ms)
     static_assert(MIN_PWM < MAX_PWM, "MIN_PWM must be less than MAX_PWM");
 }
@@ -109,7 +108,6 @@ struct MotorDiagnostics {
     MotorDirection last_direction;
     uint8_t error_count;
     bool is_overloaded;
-    float simulated_temp; // Simulated motor temperature
 };
 
 // Joystick input structure
@@ -119,7 +117,7 @@ struct JoystickInput {
 };
 
 // Global variables
-static MotorDiagnostics motor_diagnostics[2] = {{0, MotorDirection::STOP, 0, false, 25.0}, {0, MotorDirection::STOP, 0, false, 25.0}};
+static MotorDiagnostics motor_diagnostics[2] = {{0, MotorDirection::STOP, 0, false}, {0, MotorDirection::STOP, 0, false}};
 static MotorState motor_state = MotorState::IDLE;
 static DriveMode drive_mode = DriveMode::NORMAL;
 static bool is_initialized = false;
@@ -216,13 +214,10 @@ void setMotor(MotorIndex motor, int16_t speed) {
     motor_diagnostics[motor].last_pwm_value = pwm_value;
     motor_diagnostics[motor].last_direction = dir;
 
-    motor_diagnostics[motor].simulated_temp += pwm_value > 0 ? 0.1 : -0.05;
-    if (motor_diagnostics[motor].simulated_temp < 25.0) motor_diagnostics[motor].simulated_temp = 25.0;
-
-    ESP_LOGV(TAG, "Motor %d: Speed=%d, Direction=%d, PWM=%d, Temp=%.1fC", motor, speed, static_cast<int>(dir), pwm_value, motor_diagnostics[motor].simulated_temp);
+    ESP_LOGV(TAG, "Motor %d: Speed=%d, Direction=%d, PWM=%d", motor, speed, static_cast<int>(dir), pwm_value);
 }
 
-// Perform motor diagnostics with temperature monitoring
+// Perform motor diagnostics
 void runMotorDiagnostics() {
     static unsigned long last_diagnostic_time = 0;
     if (millis() - last_diagnostic_time < Constants::DIAGNOSTIC_INTERVAL) {
@@ -242,12 +237,6 @@ void runMotorDiagnostics() {
         } else {
             motor_diagnostics[i].error_count = 0;
             motor_diagnostics[i].is_overloaded = false;
-        }
-
-        if (motor_diagnostics[i].simulated_temp > Constants::MAX_TEMP_C) {
-            motor_state = MotorState::FAULT;
-            ESP_LOGE(TAG, "Motor %d over temperature: %.1fC", i, motor_diagnostics[i].simulated_temp);
-            setMotor(static_cast<MotorIndex>(i), 0);
         }
     }
 }
